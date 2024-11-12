@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract BankAccount {
+    address public owner;
+    uint public balance;
+
+    // Constructor marked as payable to allow receiving Ether on contract creation
+    constructor() payable {
+        owner = msg.sender;
+        balance = msg.value; // The contract will accept initial Ether sent during deployment
+    }
+
+    // Deposit function to add funds to the account
+    function deposit() public payable {
+        balance += msg.value;
+    }
+
+    // Withdraw function to withdraw funds from the account
+    function withdraw(uint amount) public {
+        require(msg.sender == owner, "Only the owner can withdraw.");
+        require(amount <= balance, "Insufficient balance.");
+        balance -= amount;
+        payable(msg.sender).transfer(amount);
+    }
+
+    // Show balance function
+    function showBalance() public view returns (uint) {
+        return balance;
+    }
+}

@@ -1,0 +1,160 @@
+
+
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler, LabelEncoder
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.svm import SVC
+    from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, confusion_matrix, accuracy_score
+    import numpy as np
+
+    df = pd.read_csv("emails.csv")
+    df
+
+           Email No.  the  to  ect  and  for  of    a  you  hou  ...  connevey  \
+    0        Email 1    0   0    1    0    0   0    2    0    0  ...         0   
+    1        Email 2    8  13   24    6    6   2  102    1   27  ...         0   
+    2        Email 3    0   0    1    0    0   0    8    0    0  ...         0   
+    3        Email 4    0   5   22    0    5   1   51    2   10  ...         0   
+    4        Email 5    7   6   17    1    5   2   57    0    9  ...         0   
+    ...          ...  ...  ..  ...  ...  ...  ..  ...  ...  ...  ...       ...   
+    5167  Email 5168    2   2    2    3    0   0   32    0    0  ...         0   
+    5168  Email 5169   35  27   11    2    6   5  151    4    3  ...         0   
+    5169  Email 5170    0   0    1    1    0   0   11    0    0  ...         0   
+    5170  Email 5171    2   7    1    0    2   1   28    2    0  ...         0   
+    5171  Email 5172   22  24    5    1    6   5  148    8    2  ...         0   
+
+          jay  valued  lay  infrastructure  military  allowing  ff  dry  \
+    0       0       0    0               0         0         0   0    0   
+    1       0       0    0               0         0         0   1    0   
+    2       0       0    0               0         0         0   0    0   
+    3       0       0    0               0         0         0   0    0   
+    4       0       0    0               0         0         0   1    0   
+    ...   ...     ...  ...             ...       ...       ...  ..  ...   
+    5167    0       0    0               0         0         0   0    0   
+    5168    0       0    0               0         0         0   1    0   
+    5169    0       0    0               0         0         0   0    0   
+    5170    0       0    0               0         0         0   1    0   
+    5171    0       0    0               0         0         0   0    0   
+
+          Prediction  
+    0              0  
+    1              0  
+    2              0  
+    3              0  
+    4              0  
+    ...          ...  
+    5167           0  
+    5168           0  
+    5169           1  
+    5170           1  
+    5171           0  
+
+    [5172 rows x 3002 columns]
+
+    missing_values = df.isnull().sum()
+    print("Missing values in the dataset:")
+    print(missing_values)
+
+    df.dropna(inplace=True)
+
+    missing_values = df.isnull().sum()
+    print("Missing values after handling:")
+    print(missing_values)
+
+    Missing values in the dataset:
+    Email No.     0
+    the           0
+    to            0
+    ect           0
+    and           0
+                 ..
+    military      0
+    allowing      0
+    ff            0
+    dry           0
+    Prediction    0
+    Length: 3002, dtype: int64
+    Missing values after handling:
+    Email No.     0
+    the           0
+    to            0
+    ect           0
+    and           0
+                 ..
+    military      0
+    allowing      0
+    ff            0
+    dry           0
+    Prediction    0
+    Length: 3002, dtype: int64
+
+    # Step 3: Separate features and target variable
+    X = df.drop(columns=['Email No.', 'Prediction'])  # Features (drop non-relevant columns)
+    y = df['Prediction']  # Labels (0 - Not Spam, 1 - Spam)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+
+    # Step 5: Standardize the feature set for both KNN and SVM
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    k = int(input("Enter the value of k for K-Nearest Neighbors: "))
+
+    # Initialize KNN classifier with the user-defined k value
+    knn = KNeighborsClassifier(n_neighbors=k)
+    knn.fit(X_train, y_train)
+
+    y_pred_knn=knn.predict(X_test)
+    print("KNN:",y_pred_knn)
+
+    Enter the value of k for K-Nearest Neighbors: 4
+    KNN: [0 0 1 ... 0 1 1]
+
+    print("\nKNN Model Performance:")
+    print("KNN Accuracy:", accuracy_score(y_test, y_pred_knn))
+    print("KNN R²:", r2_score(y_test, y_pred_knn))
+    print("KNN MSE:", mean_squared_error(y_test, y_pred_knn))
+    print("KNN RMSE:", np.sqrt(mean_squared_error(y_test, y_pred_knn)))
+    print("KNN MAE:", mean_absolute_error(y_test, y_pred_knn))
+    print("KNN Confusion Matrix:\n", confusion_matrix(y_test, y_pred_knn))
+
+
+    KNN Model Performance:
+    KNN Accuracy: 0.8608247422680413
+    KNN R²: 0.3283740871708055
+    KNN MSE: 0.13917525773195877
+    KNN RMSE: 0.3730620025303552
+    KNN MAE: 0.13917525773195877
+    KNN Confusion Matrix:
+     [[922 175]
+     [ 41 414]]
+
+    svm = SVC(kernel='linear')
+    svm.fit(X_train, y_train)
+
+    y_pred_svm = svm.predict(X_test)
+    print("SVM:",y_pred_svm)
+
+    SVM: [0 0 1 ... 0 0 1]
+
+    print("\nSVM Model Performance:")
+    print("SVM Accuracy:", accuracy_score(y_test, y_pred_svm))
+    print("SVM R²:", r2_score(y_test, y_pred_svm))
+    print("SVM MSE:", mean_squared_error(y_test, y_pred_svm))
+    print("SVM RMSE:", np.sqrt(mean_squared_error(y_test, y_pred_svm)))
+    print("SVM MAE:", mean_absolute_error(y_test, y_pred_svm))
+    print("SVM Confusion Matrix:\n", confusion_matrix(y_test, y_pred_svm))
+
+
+    SVM Model Performance:
+    SVM Accuracy: 0.9400773195876289
+    SVM R²: 0.710827731976319
+    SVM MSE: 0.059922680412371136
+    SVM RMSE: 0.2447910954515526
+    SVM MAE: 0.059922680412371136
+    SVM Confusion Matrix:
+     [[1043   54]
+     [  39  416]]

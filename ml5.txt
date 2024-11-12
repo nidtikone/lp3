@@ -1,0 +1,68 @@
+
+
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+
+    data = pd.read_csv('diabetes.csv')
+    print(data.isnull().sum())
+
+    Pregnancies      0
+    Glucose          0
+    BloodPressure    0
+    SkinThickness    0
+    Insulin          0
+    BMI              0
+    Pedigree         0
+    Age              0
+    Outcome          0
+    dtype: int64
+
+    X = data.drop('Outcome', axis=1)  # Features
+    y = data['Outcome']  # Target variable
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=123)
+
+    # Standardize the features (KNN is sensitive to scaling)
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    k = int(input("Enter the value of k for K-Nearest Neighbors: "))
+
+    # Initialize KNN classifier with the user-defined k value
+    knn = KNeighborsClassifier(n_neighbors=k)
+
+    # Train the classifier
+    knn.fit(X_train, y_train)
+
+    Enter the value of k for K-Nearest Neighbors:  5
+
+    KNeighborsClassifier()
+
+    y_pred = knn.predict(X_test)
+
+    # Compute the confusion matrix
+    conf_matrix = confusion_matrix(y_test, y_pred)
+
+    # Calculate accuracy, error rate, precision, and recall
+    accuracy = accuracy_score(y_test, y_pred)
+    error_rate = 1 - accuracy
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+
+    print(f"Confusion Matrix:\n{conf_matrix}")
+    print(f"Accuracy: {accuracy * 100:.2f}%")
+    print(f"Error Rate: {error_rate * 100:.2f}%")
+    print(f"Precision: {precision * 100:.2f}%")
+    print(f"Recall: {recall * 100:.2f}%")
+
+    Confusion Matrix:
+    [[85 11]
+     [25 33]]
+    Accuracy: 76.62%
+    Error Rate: 23.38%
+    Precision: 75.00%
+    Recall: 56.90%

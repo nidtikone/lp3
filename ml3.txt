@@ -1,0 +1,299 @@
+
+
+    import numpy as np
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import accuracy_score,confusion_matrix
+    from sklearn.preprocessing import StandardScaler
+    import tensorflow as tf
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense
+
+    df = pd.read_csv(r"D:\COLLEG_files\All_SEM_files\4th_year\Sem_7\All_codes\LP_3\ML\Churn_Modelling.csv")
+    df
+
+          RowNumber  CustomerId    Surname  CreditScore Geography  Gender  Age  \
+    0             1    15634602   Hargrave          619    France  Female   42   
+    1             2    15647311       Hill          608     Spain  Female   41   
+    2             3    15619304       Onio          502    France  Female   42   
+    3             4    15701354       Boni          699    France  Female   39   
+    4             5    15737888   Mitchell          850     Spain  Female   43   
+    ...         ...         ...        ...          ...       ...     ...  ...   
+    9995       9996    15606229   Obijiaku          771    France    Male   39   
+    9996       9997    15569892  Johnstone          516    France    Male   35   
+    9997       9998    15584532        Liu          709    France  Female   36   
+    9998       9999    15682355  Sabbatini          772   Germany    Male   42   
+    9999      10000    15628319     Walker          792    France  Female   28   
+
+          Tenure    Balance  NumOfProducts  HasCrCard  IsActiveMember  \
+    0          2       0.00              1          1               1   
+    1          1   83807.86              1          0               1   
+    2          8  159660.80              3          1               0   
+    3          1       0.00              2          0               0   
+    4          2  125510.82              1          1               1   
+    ...      ...        ...            ...        ...             ...   
+    9995       5       0.00              2          1               0   
+    9996      10   57369.61              1          1               1   
+    9997       7       0.00              1          0               1   
+    9998       3   75075.31              2          1               0   
+    9999       4  130142.79              1          1               0   
+
+          EstimatedSalary  Exited  
+    0           101348.88       1  
+    1           112542.58       0  
+    2           113931.57       1  
+    3            93826.63       0  
+    4            79084.10       0  
+    ...               ...     ...  
+    9995         96270.64       0  
+    9996        101699.77       0  
+    9997         42085.58       1  
+    9998         92888.52       1  
+    9999         38190.78       0  
+
+    [10000 rows x 14 columns]
+
+    df = df.drop(['RowNumber','CustomerId','Surname'],axis=1)
+
+    df = pd.get_dummies(df, columns=['Gender','Geography'],drop_first=True)
+
+    x = df.drop(['Exited'],axis=1)
+    y = df['Exited']
+
+    y
+
+    0       1
+    1       0
+    2       1
+    3       0
+    4       0
+           ..
+    9995    0
+    9996    0
+    9997    1
+    9998    1
+    9999    0
+    Name: Exited, Length: 10000, dtype: int64
+
+    x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.3,random_state=42)
+
+    scaler = StandardScaler()
+    x_train = scaler.fit_transform(x_train)
+    x_test = scaler.transform(x_test)
+
+    def build_model(a_func):
+        model = Sequential()
+        model.add(Dense(16,input_dim=x_train.shape[1],activation=a_func))
+        model.add(Dense(8,activation=a_func))
+        model.add(Dense(1,activation='sigmoid'))
+        model.compile(optimizer='adam', loss='binary_crossentropy')
+        return model
+
+    activations = ['relu','sigmoid','tanh']
+    results = {}
+
+    for a in activations:
+        print(f"\nTraining model with {a}")
+        model = build_model(a)
+        model.fit(x_train, y_train, batch_size=32, epochs=25, validation_data=(x_test,y_test))
+        
+        y_pred = (model.predict(x_test)>0.5).astype(int)
+        
+        print("\nModel Performance:")
+        print("Accuracy:", accuracy_score(y_test, y_pred))
+        print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+
+    Training model with relu
+    Epoch 1/25
+
+    C:\Users\varun\AppData\Local\Programs\Python\Python312\Lib\site-packages\keras\src\layers\core\dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 1s 1ms/step - loss: 0.6064 - val_loss: 0.4453
+    Epoch 2/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 868us/step - loss: 0.4506 - val_loss: 0.4048
+    Epoch 3/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 811us/step - loss: 0.4139 - val_loss: 0.3811
+    Epoch 4/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 790us/step - loss: 0.3946 - val_loss: 0.3670
+    Epoch 5/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 778us/step - loss: 0.3712 - val_loss: 0.3569
+    Epoch 6/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 728us/step - loss: 0.3806 - val_loss: 0.3517
+    Epoch 7/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 702us/step - loss: 0.3607 - val_loss: 0.3495
+    Epoch 8/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 740us/step - loss: 0.3548 - val_loss: 0.3502
+    Epoch 9/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 709us/step - loss: 0.3547 - val_loss: 0.3483
+    Epoch 10/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 791us/step - loss: 0.3546 - val_loss: 0.3445
+    Epoch 11/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 745us/step - loss: 0.3529 - val_loss: 0.3441
+    Epoch 12/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 863us/step - loss: 0.3442 - val_loss: 0.3441
+    Epoch 13/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 771us/step - loss: 0.3445 - val_loss: 0.3430
+    Epoch 14/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 753us/step - loss: 0.3519 - val_loss: 0.3417
+    Epoch 15/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 792us/step - loss: 0.3358 - val_loss: 0.3410
+    Epoch 16/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 764us/step - loss: 0.3446 - val_loss: 0.3396
+    Epoch 17/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 770us/step - loss: 0.3278 - val_loss: 0.3418
+    Epoch 18/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 752us/step - loss: 0.3389 - val_loss: 0.3397
+    Epoch 19/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 750us/step - loss: 0.3372 - val_loss: 0.3398
+    Epoch 20/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 754us/step - loss: 0.3308 - val_loss: 0.3379
+    Epoch 21/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 821us/step - loss: 0.3424 - val_loss: 0.3375
+    Epoch 22/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 757us/step - loss: 0.3370 - val_loss: 0.3361
+    Epoch 23/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 752us/step - loss: 0.3363 - val_loss: 0.3364
+    Epoch 24/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 762us/step - loss: 0.3290 - val_loss: 0.3397
+    Epoch 25/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 780us/step - loss: 0.3327 - val_loss: 0.3378
+    94/94 ━━━━━━━━━━━━━━━━━━━━ 0s 676us/step
+
+    Model Performance:
+    Accuracy: 0.8656666666666667
+    Confusion Matrix:
+     [[2300  116]
+     [ 287  297]]
+
+    Training model with sigmoid
+    Epoch 1/25
+
+    C:\Users\varun\AppData\Local\Programs\Python\Python312\Lib\site-packages\keras\src\layers\core\dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 1s 1ms/step - loss: 0.5478 - val_loss: 0.4894
+    Epoch 2/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 744us/step - loss: 0.5024 - val_loss: 0.4720
+    Epoch 3/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 958us/step - loss: 0.4869 - val_loss: 0.4495
+    Epoch 4/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 748us/step - loss: 0.4554 - val_loss: 0.4331
+    Epoch 5/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 764us/step - loss: 0.4483 - val_loss: 0.4205
+    Epoch 6/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 794us/step - loss: 0.4462 - val_loss: 0.4157
+    Epoch 7/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 736us/step - loss: 0.4258 - val_loss: 0.4145
+    Epoch 8/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 780us/step - loss: 0.4274 - val_loss: 0.4130
+    Epoch 9/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 745us/step - loss: 0.4198 - val_loss: 0.4119
+    Epoch 10/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 825us/step - loss: 0.4225 - val_loss: 0.4111
+    Epoch 11/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 784us/step - loss: 0.4251 - val_loss: 0.4100
+    Epoch 12/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 817us/step - loss: 0.4295 - val_loss: 0.4086
+    Epoch 13/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 751us/step - loss: 0.4145 - val_loss: 0.4095
+    Epoch 14/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 780us/step - loss: 0.4209 - val_loss: 0.4074
+    Epoch 15/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 771us/step - loss: 0.4182 - val_loss: 0.4081
+    Epoch 16/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 761us/step - loss: 0.4238 - val_loss: 0.4058
+    Epoch 17/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 789us/step - loss: 0.4180 - val_loss: 0.4043
+    Epoch 18/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 730us/step - loss: 0.4075 - val_loss: 0.4030
+    Epoch 19/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 888us/step - loss: 0.4240 - val_loss: 0.4018
+    Epoch 20/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 759us/step - loss: 0.4064 - val_loss: 0.4009
+    Epoch 21/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 715us/step - loss: 0.4103 - val_loss: 0.3998
+    Epoch 22/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 740us/step - loss: 0.4163 - val_loss: 0.3990
+    Epoch 23/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 727us/step - loss: 0.4155 - val_loss: 0.3977
+    Epoch 24/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 717us/step - loss: 0.4172 - val_loss: 0.3972
+    Epoch 25/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 747us/step - loss: 0.4035 - val_loss: 0.3972
+    94/94 ━━━━━━━━━━━━━━━━━━━━ 0s 542us/step
+
+    Model Performance:
+    Accuracy: 0.8366666666666667
+    Confusion Matrix:
+     [[2312  104]
+     [ 386  198]]
+
+    Training model with tanh
+    Epoch 1/25
+
+    C:\Users\varun\AppData\Local\Programs\Python\Python312\Lib\site-packages\keras\src\layers\core\dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 1s 1ms/step - loss: 0.6132 - val_loss: 0.4411
+    Epoch 2/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 736us/step - loss: 0.4450 - val_loss: 0.4067
+    Epoch 3/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 774us/step - loss: 0.4174 - val_loss: 0.3954
+    Epoch 4/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 842us/step - loss: 0.4117 - val_loss: 0.3858
+    Epoch 5/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 760us/step - loss: 0.3954 - val_loss: 0.3765
+    Epoch 6/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 752us/step - loss: 0.3942 - val_loss: 0.3679
+    Epoch 7/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 786us/step - loss: 0.3845 - val_loss: 0.3621
+    Epoch 8/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 826us/step - loss: 0.3816 - val_loss: 0.3572
+    Epoch 9/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 767us/step - loss: 0.3577 - val_loss: 0.3523
+    Epoch 10/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 784us/step - loss: 0.3553 - val_loss: 0.3492
+    Epoch 11/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 748us/step - loss: 0.3492 - val_loss: 0.3466
+    Epoch 12/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 794us/step - loss: 0.3508 - val_loss: 0.3430
+    Epoch 13/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 771us/step - loss: 0.3551 - val_loss: 0.3407
+    Epoch 14/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 756us/step - loss: 0.3447 - val_loss: 0.3399
+    Epoch 15/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 769us/step - loss: 0.3501 - val_loss: 0.3389
+    Epoch 16/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 783us/step - loss: 0.3553 - val_loss: 0.3374
+    Epoch 17/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 791us/step - loss: 0.3324 - val_loss: 0.3370
+    Epoch 18/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 751us/step - loss: 0.3420 - val_loss: 0.3367
+    Epoch 19/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 734us/step - loss: 0.3488 - val_loss: 0.3350
+    Epoch 20/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 867us/step - loss: 0.3497 - val_loss: 0.3359
+    Epoch 21/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 850us/step - loss: 0.3491 - val_loss: 0.3339
+    Epoch 22/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 736us/step - loss: 0.3493 - val_loss: 0.3323
+    Epoch 23/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 827us/step - loss: 0.3465 - val_loss: 0.3320
+    Epoch 24/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 747us/step - loss: 0.3494 - val_loss: 0.3332
+    Epoch 25/25
+    219/219 ━━━━━━━━━━━━━━━━━━━━ 0s 742us/step - loss: 0.3348 - val_loss: 0.3325
+    94/94 ━━━━━━━━━━━━━━━━━━━━ 0s 680us/step
+
+    Model Performance:
+    Accuracy: 0.8676666666666667
+    Confusion Matrix:
+     [[2345   71]
+     [ 326  258]]
+
+    for a in y_pred:
+        print(a)
+
+    
