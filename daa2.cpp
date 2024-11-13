@@ -1,5 +1,9 @@
 #include <bits/stdc++.h>
-
+#include <iostream>
+#include <algorithm> // Include this for 'sort'
+#include <chrono>
+#include <iomanip>
+#include <vector>  
 using namespace std;
 
 struct MinHeapNode {
@@ -14,15 +18,16 @@ struct MinHeapNode {
     }
 };
 
-void printCodes(struct MinHeapNode* root, string str) {
+// Function to store the Huffman codes
+void printCodes(struct MinHeapNode* root, string str, unordered_map<char, string>& codes) {
     if (root == nullptr) {
         return;
     }
     if (root->data != '$') {
-        cout << root->data << ": " << str << endl;
+        codes[root->data] = str; // Store the code for this character
     }
-    printCodes(root->left, str + "0");
-    printCodes(root->right, str + "1");
+    printCodes(root->left, str + "0", codes);
+    printCodes(root->right, str + "1", codes);
 }
 
 struct compare {
@@ -50,7 +55,15 @@ void HuffmanCode(char data[], int freq[], int size) {
         temp->right = right;
         minHeap.push(temp);
     }
-    printCodes(minHeap.top(), "");
+
+    // Store the Huffman codes in a map
+    unordered_map<char, string> codes;
+    printCodes(minHeap.top(), "", codes);
+
+    // Print the codes in the order of the input characters
+    for (int i = 0; i < size; i++) {
+        cout << data[i] << ": " << codes[data[i]] << endl;
+    }
 }
 
 int main() {
@@ -78,9 +91,3 @@ int main() {
 
     return 0;
 }
-
-/*
-Huffman Coding :
-Time complexity: O(nlogn) where n is the number of unique characters.
-If there are n nodes, extractMin() is called 2*(n – 1) times. extractMin() takes O(logn) time as it calls minHeapify(). So, overall complexity is O(nlogn).
-*/
